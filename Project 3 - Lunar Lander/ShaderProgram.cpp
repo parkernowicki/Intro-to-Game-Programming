@@ -19,7 +19,7 @@ void ShaderProgram::Load(const char *vertexShaderFile, const char *fragmentShade
     glGetProgramiv(programID, GL_LINK_STATUS, &linkSuccess);
     if(linkSuccess == GL_FALSE) {
 	printf("Error linking shader program!\n");
-    }fdasfsd
+    }
     
     modelMatrixUniform = glGetUniformLocation(programID, "modelMatrix");
     projectionMatrixUniform = glGetUniformLocation(programID, "projectionMatrix");
