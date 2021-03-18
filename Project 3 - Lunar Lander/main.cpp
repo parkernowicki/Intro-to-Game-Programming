@@ -401,6 +401,8 @@ void Render() {
 
 void Shutdown() {
     Mix_FreeMusic(music);
+    Mix_FreeMusic(music_victory);
+    Mix_FreeChunk(die);
 
     SDL_Quit();
 }
