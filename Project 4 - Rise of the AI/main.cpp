@@ -1,5 +1,10 @@
 /*
 * Project 4 - Rise of the AI
+*  CONTROLS:
+*  Left: A
+*  Right: D
+*  Jump: SPACE
+*  Sprint: LShift
 */
 
 #define GL_SILENCE_DEPRECATION
@@ -23,8 +28,8 @@
 
 #include "Entity.h"
 
-#define PLATFORM_COUNT 13
-#define BADDY_COUNT 1
+#define PLATFORM_COUNT 20
+#define BADDY_COUNT 3
 
 struct GameState {
     Entity* player;
@@ -33,6 +38,8 @@ struct GameState {
 };
 
 GameState state;
+
+int baddiesleft;
 
 SDL_Window* displayWindow;
 bool gameIsRunning = true;
@@ -47,8 +54,8 @@ GLuint fontTextureID;
 float lastTicks = 0.0f;
 float accumulator = 0.0f;
 
-Mix_Music* music, * music_victory;
-Mix_Chunk* die;
+Mix_Music* level1, *victory;
+Mix_Chunk* die, *stomp;
 
 GLuint LoadTexture(const char* filePath) {
     int w, h, n;
@@ -93,7 +100,7 @@ void Initialize() {
 
     glUseProgram(program.programID);
 
-    glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
+    glClearColor(0.2f, 0.1f, 0.1f, 1.0f);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -102,7 +109,9 @@ void Initialize() {
     state.player->type = PLAYER;
     state.player->position = glm::vec3(-4.0f, -2.25f, 0.0f);
     state.player->acceleration = 16.0f;
-    state.player->topSpeed = 160.0f;
+    state.player->walkSpeed = 150.0f;
+    state.player->runSpeed = 300.0f;
+    state.player->jumpSpeed = 8.2f;
     state.player->textureID = LoadTexture("Textures/ufo.png");
 
     state.player->animDefault = new int[4]{ 0, 2, 4, 6 };
@@ -114,7 +123,7 @@ void Initialize() {
     state.platforms = new Entity[PLATFORM_COUNT];
     GLuint platformTextureID = LoadTexture("Textures/block.png");
 
-    for (int i = 0; i < PLATFORM_COUNT - 2; i++) {
+    for (int i = 0; i < 11; i++) {
         state.platforms[i].type = PLATFORM;
         state.platforms[i].position = glm::vec3(-5.0f + i, -3.25f, 0.0f);
         state.platforms[i].textureID = platformTextureID;
@@ -128,31 +137,79 @@ void Initialize() {
     state.platforms[12].position = glm::vec3(5.0f, -2.25f, 0.0f);
     state.platforms[12].textureID = platformTextureID;
 
+    for (int i = 13; i < 18; i++) {
+        state.platforms[i].type = PLATFORM;
+        state.platforms[i].position = glm::vec3(-15.0f + i, 0.75f, 0.0f);
+        state.platforms[i].textureID = platformTextureID;
+    }
+
+    state.platforms[18].type = PLATFORM;
+    state.platforms[18].position = glm::vec3(4.0f, -2.25f, 0.0f);
+    state.platforms[18].textureID = platformTextureID;
+
+    state.platforms[19].type = PLATFORM;
+    state.platforms[19].position = glm::vec3(5.0f, -0.25f, 0.0f);
+    state.platforms[19].textureID = platformTextureID;
+
     for (int i = 0; i < PLATFORM_COUNT; i++)
         state.platforms[i].Update(0, state.player, NULL, 0, NULL, 0);
 
+    baddiesleft = BADDY_COUNT;
     state.baddies = new Entity[BADDY_COUNT];
-    GLuint baddieTextureID = state.player->textureID;
+    GLuint roscoeTextureID = LoadTexture("Textures/roscoe.png");
+    GLuint rupertTextureID = LoadTexture("Textures/rupert.png");
+    GLuint ozzpreyTextureID = LoadTexture("Textures/ozzprey.png");
 
     state.baddies[0].type = BADDY;
-    state.baddies[0].position = glm::vec3(4.0f, -2.25f, 0.0f);
+    state.baddies[0].ai = PACER;
+    state.baddies[0].position = glm::vec3(3.0f, -2.25f, 0.0f);
     state.baddies[0].movement.x = 1;
     state.baddies[0].acceleration = 16.0f;
-    state.baddies[0].topSpeed = 80.0f;
-    state.baddies[0].textureID = baddieTextureID;
-    
-    state.baddies[0].ai = WALKER;
-    state.baddies[0].state = PATROL;
+    state.baddies[0].walkSpeed = 80.0f;
+    state.baddies[0].textureID = roscoeTextureID;
+
+    state.baddies[0].animDefault = new int[2]{ 0, 1 };
+    state.baddies[0].animIndices = state.baddies[0].animDefault;
+    state.baddies[0].animFrames = 2;
+    state.baddies[0].animRows = 2;
+    state.baddies[0].animCols = 1;
+
+    state.baddies[1].type = BADDY;
+    state.baddies[1].ai = HOPPER;
+    state.baddies[1].state = WAIT;
+    state.baddies[1].position = glm::vec3(-1.5f, 1.75f, 0.0f);
+    state.baddies[1].acceleration = 16.0f;
+    state.baddies[1].walkSpeed = 80.0f;
+    state.baddies[1].jumpSpeed = 6.0f;
+    state.baddies[1].height = 0.8f;
+    state.baddies[1].textureID = rupertTextureID;
+
+    state.baddies[1].animRows = 2;
+    state.baddies[1].animCols = 1;
+
+    state.baddies[2].type = BADDY;
+    state.baddies[2].ai = SINER;
+    state.baddies[2].position = glm::vec3(4.0f, 1.0f, 0.0f);
+    state.baddies[2].movement.x = -1;
+    state.baddies[2].acceleration = 16.0f;
+    state.baddies[2].walkSpeed = 120.0f;
+    state.baddies[2].height = 0.6f;
+    state.baddies[2].gravity = glm::vec3(0);
+    state.baddies[2].textureID = ozzpreyTextureID;
+
+    state.baddies[2].animRows = 3;
+    state.baddies[2].animCols = 1;
 
     fontTextureID = LoadTexture("Textures/pixel_font.png");
 
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
     Mix_VolumeMusic(MIX_MAX_VOLUME / 3);
-    music = Mix_LoadMUS("Sounds/stage1.mp3");
-    //music_victory = Mix_LoadMUS("Sounds/ufo_2.mp3");
+    level1 = Mix_LoadMUS("Sounds/stage1.mp3");
+    victory = Mix_LoadMUS("Sounds/victory.mp3");
     die = Mix_LoadWAV("Sounds/doh.wav");
+    stomp = Mix_LoadWAV("Sounds/stomp.wav");
 
-    Mix_PlayMusic(music, -1);
+    Mix_PlayMusic(level1, -1);
 }
 
 void ProcessInput() {
@@ -169,9 +226,8 @@ void ProcessInput() {
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
 			case SDLK_SPACE:
-				if (state.player->entColliding != NULL) {
-					if (state.player->entColliding->type == PLATFORM
-						&& state.player->collidedBottom)
+				if (state.player->collidedBottom != NULL) {
+					if (state.player->collidedBottom->type == PLATFORM)
 						state.player->isJumping = true;
 				}
 				break;
@@ -184,6 +240,8 @@ void ProcessInput() {
         state.player->movement.x = 1.0f;
     if (keys[SDL_SCANCODE_A])
         state.player->movement.x = -1.0f;
+    if (keys[SDL_SCANCODE_LSHIFT])
+        state.player->isRunning = true;
 
     if (glm::length(state.player->movement) > 1.0f)
         state.player->movement = glm::normalize(state.player->movement);
@@ -207,18 +265,43 @@ void Update() {
             NULL,
 			state.platforms, PLATFORM_COUNT,
 			state.baddies, BADDY_COUNT);
-        if (state.player->entColliding != NULL) {
-            if (state.player->entColliding->type == BADDY && (state.player->collidedLeft || state.player->collidedRight)) {
-                state.player->isDead = true;
-                Mix_PlayChannel(-1, die, 0);
-                Mix_HaltMusic();
-            }
-        }
         for (int i = 0; i < BADDY_COUNT; i++) {
             state.baddies[i].Update(FIXED_TIMESTEP,
                 state.player,
                 state.platforms, PLATFORM_COUNT,
                 NULL, 0);
+        }
+        if (state.player->collidedBottom != NULL) {
+            if (state.player->collidedBottom->type == BADDY) {
+                state.player->collidedBottom->isActive = false;
+                if (--baddiesleft == 0) {
+                    state.player->isWin = true;
+                    Mix_PlayMusic(victory, 0);
+                }
+                state.player->isJumping = true;
+                Mix_PlayChannel(-1, stomp, 0);
+            }
+        }
+        if (state.player->collidedTop != NULL) {
+            if (state.player->collidedTop->type == BADDY) {
+                state.player->isDead = true;
+                Mix_PlayChannel(-1, die, 0);
+                Mix_HaltMusic();
+            }
+        }
+        if (state.player->collidedLeft != NULL) {
+            if (state.player->collidedLeft->type == BADDY) {
+                state.player->isDead = true;
+                Mix_PlayChannel(-1, die, 0);
+                Mix_HaltMusic();
+            }
+        }
+        if (state.player->collidedRight != NULL) {
+            if (state.player->collidedRight->type == BADDY) {
+                state.player->isDead = true;
+                Mix_PlayChannel(-1, die, 0);
+                Mix_HaltMusic();
+            }
         }
 
         deltaTime -= FIXED_TIMESTEP;
@@ -292,16 +375,18 @@ void Render() {
     state.player->Render(&program);
 
     if (state.player->isDead)
-        DrawText(&program, fontTextureID, "YOU DIED", 0.25f, 0.0f, glm::vec3(-3.0f, 3.0f, 0.0f));
+        DrawText(&program, fontTextureID, "YOU DIED", 0.25f, 0.0f, glm::vec3(-4.0f, 3.0f, 0.0f));
     if (state.player->isWin)
-        DrawText(&program, fontTextureID, "TARGETS DESTROYED", 0.25f, 0.0f, glm::vec3(-3.0f, 3.0f, 0.0f));
+        DrawText(&program, fontTextureID, "TARGETS DESTROYED", 0.25f, 0.0f, glm::vec3(-4.0f, 3.0f, 0.0f));
 
     SDL_GL_SwapWindow(displayWindow);
 }
 
 void Shutdown() {
-    Mix_FreeMusic(music);
+    Mix_FreeMusic(level1);
+    Mix_FreeMusic(victory);
     Mix_FreeChunk(die);
+    Mix_FreeChunk(stomp);
 
     SDL_Quit();
 }

@@ -12,32 +12,63 @@ Entity::Entity() {
 
 void Entity::AI(Entity* player) {
 	switch (ai) {
-	case WALKER:
-		AIWalker();
+	case PACER:
+		AIPacer();
 		break;
-	case WAITANDGO:
-		AIWaitandGo(player);
+    case SINER:
+        AISiner();
+        break;
+	case HOPPER:
+		AIHopper(player);
 		break;
 	}
 }
 
-void Entity::AIWalker() {
-    if (entColliding != NULL) {
-        if (entColliding->type == PLATFORM
-            && (collidedLeft || collidedRight))
-            movement.x *= -1;
+void Entity::AIPacer() {
+	if (collidedLeft != NULL) {
+		movement.x = 1;
+	}
+    else if (collidedRight != NULL) {
+        movement.x = -1;
     }
 }
 
-void Entity::AIWaitandGo(Entity* player) {
+void Entity::AISiner() {
+    position.y += sin(fmod(timeActive * 2.0, 2.0 * M_PI)) / 30.0;
+    if (position.x <= -6.0)
+        position.x = 6.0;
+    else if (position.x >= 6.0)
+        position.x = -6.0;
+}
+
+void Entity::AIHopper(Entity* player) {
+    if (collidedBottom != NULL)
+        movement = glm::vec3(0);
+
     switch (state) {
-    case PATROL:
+    case WAIT:
+        if (glm::distance(position, player->position) <= 3.0f)
+            state = CHASE;
+        break;
+    case CHASE:
+        if (glm::distance(position, player->position) > 3.0f)
+            state = WAIT;
+        else {
+            if (player->position.x < position.x)
+                movement.x = -1;
+            else if(player->position.x > position.x)
+                movement.x = 1;
+            if (collidedBottom != NULL) {
+                if (collidedBottom->type == PLATFORM)
+                    isJumping = true;
+            }
+        }
         break;
     }
 }
 
 bool Entity::isCollideBoxtoBox(Entity* other) {
-    if (!isActive || !other->isActive) return false;
+    if (!other->isActive) return false;
 
     float xdist = fabs(other->position.x - position.x) - ((width + other->width) / 2.0f);
     float ydist = fabs(other->position.y - position.y) - ((height + other->height) / 2.0f);
@@ -45,44 +76,44 @@ bool Entity::isCollideBoxtoBox(Entity* other) {
     return xdist < 0 && ydist < 0;
 }
 
-void Entity::handleCollisionsX(Entity* objects, int objectCount) {
-    for (int i = 0; i < objectCount; i++) {
-        if (isCollideBoxtoBox(&objects[i])) {
-            float xdist = fabs(position.x - objects[i].position.x);
-            float penetrationX = fabs(xdist - ((width + objects[i].width) / 2.0f));
-            if (velocity.x > 0) {
-                position.x -= penetrationX;
-                velocity.x = 0;
-                collidedRight = true;
-            }
-            else if (velocity.x < 0) {
-                position.x += penetrationX;
-                velocity.x = 0;
-                collidedLeft = true;
-            }
-
-            entColliding = &objects[i];
-        }
-    }
-}
-
 void Entity::handleCollisionsY(Entity* objects, int objectcount) {
     for (int i = 0; i < objectcount; i++) {
         if (isCollideBoxtoBox(&objects[i])) {
             float ydist = fabs(position.y - objects[i].position.y);
             float penetrationY = fabs(ydist - ((height + objects[i].height) / 2.0f));
-            if (velocity.y > 0) {
+            if (position.y < objects[i].position.y) {
                 position.y -= penetrationY;
                 velocity.y = 0;
-                collidedTop = true;
+                collidedTop = &objects[i];
+                objects[i].collidedBottom = this;
             }
-            else if (velocity.y < 0) {
+            else if (position.y >= objects[i].position.y) {
                 position.y += penetrationY;
                 velocity.y = 0;
-                collidedBottom = true;
+                collidedBottom = &objects[i];
+                objects[i].collidedTop = this;
             }
+        }
+    }
+}
 
-            entColliding = &objects[i];
+void Entity::handleCollisionsX(Entity* objects, int objectCount) {
+    for (int i = 0; i < objectCount; i++) {
+        if (isCollideBoxtoBox(&objects[i])) {
+            float xdist = fabs(position.x - objects[i].position.x);
+            float penetrationX = fabs(xdist - ((width + objects[i].width) / 2.0f));
+            if (position.x < objects[i].position.x) {
+                position.x -= penetrationX;
+                velocity.x = 0;
+                collidedRight = &objects[i];
+                objects[i].collidedLeft = this;
+            }
+            else if (position.x >= objects[i].position.x) {
+                position.x += penetrationX;
+                velocity.x = 0;
+                collidedLeft = &objects[i];
+                objects[i].collidedRight = this;
+            }
         }
     }
 }
@@ -91,7 +122,9 @@ void Entity::Update(float timestep,
 	Entity* player,
 	Entity* platforms, int platformcount,
 	Entity* baddies, int baddycount) {
-    if (!isActive || isDead || isWin) return;
+    if (!isActive) return;
+
+    timeActive += timestep;
 
     if (animIndices != NULL) {
         animTime += timestep;
@@ -105,18 +138,17 @@ void Entity::Update(float timestep,
         AI(player);
     }
 
-    entColliding = NULL;
-
-    collidedTop = false;
-    collidedBottom = false;
-    collidedLeft = false;
-    collidedRight = false;
+    collidedTop = NULL;
+    collidedBottom = NULL;
+    collidedLeft = NULL;
+    collidedRight = NULL;
 
     if (isJumping) {
         isJumping = false;
-        velocity.y = 8.0f;
+        velocity.y = jumpSpeed;
     }
 
+    //Decelerate if stopped
     if (movement == glm::vec3(0)) {
         if (velocity.x < 0)
             velocity.x = fmin(velocity.x + (acceleration * timestep), 0);
@@ -124,16 +156,31 @@ void Entity::Update(float timestep,
             velocity.x = fmax(velocity.x - (acceleration * timestep), 0);
     }
     velocity += (gravity + (movement * acceleration)) * timestep;
-    if (velocity.x >= topSpeed * timestep) velocity.x = topSpeed * timestep;
-    if (velocity.x <= -topSpeed * timestep) velocity.x = -topSpeed * timestep;
+    //Clamp movement speed
+    if (!isRunning) {
+        if (velocity.x >= walkSpeed * timestep) velocity.x = walkSpeed * timestep;
+        if (velocity.x <= -walkSpeed * timestep) velocity.x = -walkSpeed * timestep;
+    }
+    else {
+        if (velocity.x >= runSpeed * timestep) velocity.x = runSpeed * timestep;
+        if (velocity.x <= -runSpeed * timestep) velocity.x = -runSpeed * timestep;
+    }
 
-    position.x += velocity.x * timestep;
-    handleCollisionsX(platforms, platformcount);
-    handleCollisionsX(baddies, baddycount);
+    isRunning = false;
 
     position.y += velocity.y * timestep;
-    handleCollisionsY(platforms, platformcount);
+    if (ai != SINER)
+        handleCollisionsY(platforms, platformcount);
+    if (type != PLAYER)
+        handleCollisionsY(player, 1);
     handleCollisionsY(baddies, baddycount);
+
+    position.x += velocity.x * timestep;
+    if (ai != SINER)
+        handleCollisionsX(platforms, platformcount);
+    if (type != PLAYER)
+        handleCollisionsX(player, 1);
+    handleCollisionsX(baddies, baddycount);
 
 	modelMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::translate(modelMatrix, position);
@@ -176,6 +223,24 @@ void Entity::Render(ShaderProgram* program) {
     }
     if (isWin) {
         DrawSpriteFromTextureAtlas(program, 3);
+        return;
+    }
+
+    if (ai == SINER) {
+        if (sin(fmod(timeActive * 2.0, 2.0 * M_PI)) > 0.33)
+            DrawSpriteFromTextureAtlas(program, 2);
+        else if (sin(fmod(timeActive * 2.0, 2.0 * M_PI)) < -0.33)
+            DrawSpriteFromTextureAtlas(program, 1);
+        else
+            DrawSpriteFromTextureAtlas(program, 0);
+        return;
+    }
+
+    if (ai == HOPPER) {
+        if (state == WAIT)
+            DrawSpriteFromTextureAtlas(program, 0);
+        else
+            DrawSpriteFromTextureAtlas(program, 1);
         return;
     }
 

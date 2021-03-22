@@ -11,18 +11,19 @@
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
+#include <cmath>
 
 enum EntityType { PLAYER, PLATFORM, BADDY };
 
-enum AIType { WALKER, WAITANDGO };
-enum AIState { PATROL };
+enum AIType { AI_DEF, PACER, SINER, HOPPER };
+enum AIState { ST_DEF, WAIT, CHASE };
 
 class Entity {
 public:
 	EntityType type;
 
-	AIType ai;
-	AIState state;
+	AIType ai = AI_DEF;
+	AIState state = ST_DEF;
 
 	glm::vec3 position;
 	glm::vec3 movement;
@@ -31,17 +32,17 @@ public:
 
 	glm::mat4 modelMatrix;
 
-	float acceleration = 0.0f, topSpeed = 0.0f;
-	bool isJumping = false;
+	float acceleration = 0.0f, walkSpeed = 0.0f, runSpeed = 0.0f, jumpSpeed = 0.0f;
+	bool isJumping = false, isRunning = false;
 
 	float width = 1.0f, height = 1.0f;
 
-	Entity* entColliding = NULL;
+	Entity* collidedTop = NULL;
+	Entity* collidedBottom = NULL;
+	Entity* collidedLeft = NULL;
+	Entity* collidedRight = NULL;
 
-	bool collidedTop = false;
-	bool collidedBottom = false;
-	bool collidedLeft = false;
-	bool collidedRight = false;
+	float timeActive = 0.0f;
 
 	bool isActive = true;
 	bool isDead = false;
@@ -60,8 +61,9 @@ public:
 	Entity();
 
 	void AI(Entity* player);
-	void AIWalker();
-	void AIWaitandGo(Entity* player);
+	void AIPacer();
+	void AISiner();
+	void AIHopper(Entity* player);
 
 	bool isCollideBoxtoBox(Entity* other);
 	void handleCollisionsX(Entity* objects, int objectCount);
