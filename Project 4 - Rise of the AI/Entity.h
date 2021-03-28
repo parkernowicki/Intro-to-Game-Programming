@@ -66,8 +66,8 @@ public:
 	void AIHopper(Entity* player);
 
 	bool isCollideBoxtoBox(Entity* other);
-	void handleCollisionsX(Entity* objects, int objectCount);
-	void handleCollisionsY(Entity* objects, int objectCount);
+	void handleCollisionsX(Entity* objects, int objectCount, bool correct);
+	void handleCollisionsY(Entity* objects, int objectCount, bool correct);
 	void Update(float timestep,
 		Entity* player,
 		Entity* platforms, int platformcount,

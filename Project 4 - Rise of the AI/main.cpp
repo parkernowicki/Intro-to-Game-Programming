@@ -28,7 +28,7 @@
 
 #include "Entity.h"
 
-#define PLATFORM_COUNT 20
+#define PLATFORM_COUNT 30
 #define BADDY_COUNT 3
 
 struct GameState {
@@ -54,8 +54,8 @@ GLuint fontTextureID;
 float lastTicks = 0.0f;
 float accumulator = 0.0f;
 
-Mix_Music* level1, *victory;
-Mix_Chunk* die, *stomp;
+Mix_Music* level1, * victory;
+Mix_Chunk* die, * stomp;
 
 GLuint LoadTexture(const char* filePath) {
     int w, h, n;
@@ -107,7 +107,7 @@ void Initialize() {
 
     state.player = new Entity;
     state.player->type = PLAYER;
-    state.player->position = glm::vec3(-4.0f, -2.25f, 0.0f);
+    state.player->position = glm::vec3(-4.0f, -1.25f, 0.0f);
     state.player->acceleration = 16.0f;
     state.player->walkSpeed = 150.0f;
     state.player->runSpeed = 300.0f;
@@ -137,19 +137,47 @@ void Initialize() {
     state.platforms[12].position = glm::vec3(5.0f, -2.25f, 0.0f);
     state.platforms[12].textureID = platformTextureID;
 
-    for (int i = 13; i < 18; i++) {
+    for (int i = 13; i < 21; i++) {
         state.platforms[i].type = PLATFORM;
-        state.platforms[i].position = glm::vec3(-15.0f + i, 0.75f, 0.0f);
+        state.platforms[i].position = glm::vec3(-18.0f + i, 0.75f, 0.0f);
         state.platforms[i].textureID = platformTextureID;
     }
 
-    state.platforms[18].type = PLATFORM;
-    state.platforms[18].position = glm::vec3(4.0f, -2.25f, 0.0f);
-    state.platforms[18].textureID = platformTextureID;
+    state.platforms[21].type = PLATFORM;
+    state.platforms[21].position = glm::vec3(4.0f, -2.25f, 0.0f);
+    state.platforms[21].textureID = platformTextureID;
 
-    state.platforms[19].type = PLATFORM;
-    state.platforms[19].position = glm::vec3(5.0f, -0.25f, 0.0f);
-    state.platforms[19].textureID = platformTextureID;
+    state.platforms[22].type = PLATFORM;
+    state.platforms[22].position = glm::vec3(5.0f, -0.25f, 0.0f);
+    state.platforms[22].textureID = platformTextureID;
+
+    state.platforms[23].type = PLATFORM;
+    state.platforms[23].position = glm::vec3(-5.0f, -1.25f, 0.0f);
+    state.platforms[23].textureID = platformTextureID;
+
+    state.platforms[24].type = PLATFORM;
+    state.platforms[24].position = glm::vec3(-5.0f, -0.25f, 0.0f);
+    state.platforms[24].textureID = platformTextureID;
+
+    state.platforms[25].type = PLATFORM;
+    state.platforms[25].position = glm::vec3(-4.0f, -2.25f, 0.0f);
+    state.platforms[25].textureID = platformTextureID;
+
+    state.platforms[26].type = PLATFORM;
+    state.platforms[26].position = glm::vec3(5.0f, -1.25f, 0.0f);
+    state.platforms[26].textureID = platformTextureID;
+
+    state.platforms[27].type = PLATFORM;
+    state.platforms[27].position = glm::vec3(-5.0f, 1.75f, 0.0f);
+    state.platforms[27].textureID = platformTextureID;
+
+    state.platforms[28].type = PLATFORM;
+    state.platforms[28].position = glm::vec3(-4.0f, 1.75f, 0.0f);
+    state.platforms[28].textureID = platformTextureID;
+
+    state.platforms[29].type = PLATFORM;
+    state.platforms[29].position = glm::vec3(-3.0f, 1.75f, 0.0f);
+    state.platforms[29].textureID = platformTextureID;
 
     for (int i = 0; i < PLATFORM_COUNT; i++)
         state.platforms[i].Update(0, state.player, NULL, 0, NULL, 0);
@@ -177,7 +205,7 @@ void Initialize() {
     state.baddies[1].type = BADDY;
     state.baddies[1].ai = HOPPER;
     state.baddies[1].state = WAIT;
-    state.baddies[1].position = glm::vec3(-1.5f, 1.75f, 0.0f);
+    state.baddies[1].position = glm::vec3(-3.5f, 2.75f, 0.0f);
     state.baddies[1].acceleration = 16.0f;
     state.baddies[1].walkSpeed = 80.0f;
     state.baddies[1].jumpSpeed = 6.0f;
@@ -215,25 +243,25 @@ void Initialize() {
 void ProcessInput() {
     state.player->movement = glm::vec3(0);
 
-	SDL_Event event;
-	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
-		case SDL_QUIT:
-		case SDL_WINDOWEVENT_CLOSE:
-			gameIsRunning = false;
-			break;
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_QUIT:
+        case SDL_WINDOWEVENT_CLOSE:
+            gameIsRunning = false;
+            break;
 
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-			case SDLK_SPACE:
-				if (state.player->collidedBottom != NULL) {
-					if (state.player->collidedBottom->type == PLATFORM)
-						state.player->isJumping = true;
-				}
-				break;
-			}
-		}
-	}
+        case SDL_KEYDOWN:
+            switch (event.key.keysym.sym) {
+            case SDLK_SPACE:
+                if (state.player->collidedBottom != NULL) {
+                    if (state.player->collidedBottom->type == PLATFORM)
+                        state.player->isJumping = true;
+                }
+                break;
+            }
+        }
+    }
 
     const Uint8* keys = SDL_GetKeyboardState(NULL);
     if (keys[SDL_SCANCODE_D])
@@ -261,10 +289,10 @@ void Update() {
     }
 
     while (deltaTime >= FIXED_TIMESTEP) {
-		state.player->Update(FIXED_TIMESTEP,
+        state.player->Update(FIXED_TIMESTEP,
             NULL,
-			state.platforms, PLATFORM_COUNT,
-			state.baddies, BADDY_COUNT);
+            state.platforms, PLATFORM_COUNT,
+            state.baddies, BADDY_COUNT);
         for (int i = 0; i < BADDY_COUNT; i++) {
             state.baddies[i].Update(FIXED_TIMESTEP,
                 state.player,
@@ -283,21 +311,24 @@ void Update() {
             }
         }
         if (state.player->collidedTop != NULL) {
-            if (state.player->collidedTop->type == BADDY) {
+            if (state.player->collidedTop->type == BADDY
+                && state.player->collidedTop->isActive) {
                 state.player->isDead = true;
                 Mix_PlayChannel(-1, die, 0);
                 Mix_HaltMusic();
             }
         }
-        if (state.player->collidedLeft != NULL) {
-            if (state.player->collidedLeft->type == BADDY) {
+        else if (state.player->collidedLeft != NULL) {
+            if (state.player->collidedLeft->type == BADDY
+                && state.player->collidedLeft->isActive) {
                 state.player->isDead = true;
                 Mix_PlayChannel(-1, die, 0);
                 Mix_HaltMusic();
             }
         }
-        if (state.player->collidedRight != NULL) {
-            if (state.player->collidedRight->type == BADDY) {
+        else if (state.player->collidedRight != NULL) {
+            if (state.player->collidedRight->type == BADDY
+                && state.player->collidedRight->isActive) {
                 state.player->isDead = true;
                 Mix_PlayChannel(-1, die, 0);
                 Mix_HaltMusic();
