@@ -15,9 +15,9 @@
 #include "Map.h"
 #include <cmath>
 
-enum EntityType { PLAYER, PLATFORM, BADDY };
+enum EntityType { PLAYER, BADDY };
 
-enum AIType { AI_DEF, PACER, SINER, HOPPER };
+enum AIType { AI_DEF, PACER, SINER, HOPPER, BOSS_PACER };
 enum AIState { ST_DEF, WAIT, CHASE };
 
 class Entity {
@@ -35,20 +35,27 @@ public:
 	glm::mat4 modelMatrix;
 
 	float acceleration = 0.0f, walkSpeed = 0.0f, runSpeed = 0.0f, jumpSpeed = 0.0f;
-	bool isJumping = false, isRunning = false;
+	bool isJumping = false, isRunning = false, isInvincible = false;
 
-	float width = 1.0f, height = 1.0f;
+	float width = 1.0f, height = 1.0f, draw_width = 1.0f, draw_height = 1.0f;
 
-	Entity* collidedTop = NULL;
-	Entity* collidedBottom = NULL;
-	Entity* collidedLeft = NULL;
-	Entity* collidedRight = NULL;
+	bool collidedTopMap = false;
+	bool collidedBottomMap = false;
+	bool collidedLeftMap = false;
+	bool collidedRightMap = false;
 
-	float timeActive = 0.0f;
+	Entity* collidedTopEnt = NULL;
+	Entity* collidedBottomEnt = NULL;
+	Entity* collidedLeftEnt = NULL;
+	Entity* collidedRightEnt = NULL;
+
+	float timeActive = 0.0f, jumpTimer = 0.0f, iTimer = 0.0f;
 
 	bool isActive = true;
 	bool isDead = false;
 	bool isWin = false;
+
+	int health = 1;
 
 	GLuint textureID = -1;
 
@@ -66,6 +73,7 @@ public:
 	void AIPacer();
 	void AISiner();
 	void AIHopper(Entity* player);
+	void AIBossPacer(Entity* player);
 
 	bool isCollideBoxtoBox(Entity* other);
 	void handleCollisionsY(Entity* objects, int objectCount, bool correct);

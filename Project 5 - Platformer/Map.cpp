@@ -47,8 +47,8 @@ void Map::Build() {
 		}
 	}
 
-	left_bound = 0 - (tile_size / 2) - 4;
-	right_bound = (tile_size * width) - (tile_size / 2) - 4;
+	left_bound = 0 - (tile_size / 2);
+	right_bound = (tile_size * width) - (tile_size / 2);
 
 	top_bound = 0 + (tile_size / 2);
 	bottom_bound = -(tile_size * height) + (tile_size / 2);

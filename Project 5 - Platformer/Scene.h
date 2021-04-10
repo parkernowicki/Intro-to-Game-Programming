@@ -15,23 +15,28 @@
 #include "Entity.h"
 #include "Map.h"
 
-Mix_Music* level1_theme, * victory;
-Mix_Chunk* die, * stomp;
-
-GLuint fontTextureID;
-
-int baddiesleft;
-
 struct GameState {
 	Map* map;
 	Entity* player;
 	Entity* baddies;
+	int nextScene;
 };
 
 class Scene {
 public:
 	GameState state;
+
+	glm::mat4 uiViewMatrix, uiProjectionMatrix;
+
+	int baddiesleft;
+
+	Mix_Music* leveltheme, * victory, * dead;
+	Mix_Chunk* hurt, * stomp, * bosshit;
+
+	GLuint backgroundTextureID, fontTextureID, livesTextureID;
+
 	virtual void Initialize() = 0;
-	virtual void Update(float deltaTime) = 0;
-	virtual void Render(ShaderProgram* program) = 0;
+	virtual void Update(float deltaTime, int* lives) = 0;
+	virtual void Render(ShaderProgram* program, int lives) = 0;
+	virtual void RenderBackground(ShaderProgram* program) = 0;
 };

@@ -21,28 +21,31 @@ void Entity::AI(Entity* player) {
 	case HOPPER:
 		AIHopper(player);
 		break;
+    case BOSS_PACER:
+        AIBossPacer(player);
+        break;
 	}
 }
 
 void Entity::AIPacer() {
-	if (collidedLeft != NULL) {
+	if (collidedLeftMap) {
 		movement.x = 1;
 	}
-    else if (collidedRight != NULL) {
+    else if (collidedRightMap) {
         movement.x = -1;
     }
 }
 
 void Entity::AISiner() {
     position.y += sin(fmod(timeActive * 2.0, 2.0 * M_PI)) / 30.0;
-    if (position.x <= -6.0)
+    /*if (position.x <= -6.0)
         position.x = 6.0;
     else if (position.x >= 6.0)
-        position.x = -6.0;
+        position.x = -6.0;*/
 }
 
 void Entity::AIHopper(Entity* player) {
-    if (collidedBottom != NULL)
+    if (collidedBottomMap)
         movement = glm::vec3(0);
 
     switch (state) {
@@ -58,13 +61,28 @@ void Entity::AIHopper(Entity* player) {
                 movement.x = -1;
             else if(player->position.x > position.x)
                 movement.x = 1;
-            if (collidedBottom != NULL) {
-                if (collidedBottom->type == PLATFORM)
-                    isJumping = true;
-            }
+            if (collidedBottomMap)
+                isJumping = true;
         }
         break;
     }
+}
+
+void Entity::AIBossPacer(Entity* player) {
+    if (isInvincible)
+        walkSpeed = 200.0f;
+    else
+        walkSpeed = 80.0f;
+    if (fmod(timeActive, 1.0) > 0.75) {
+        if (player->position.x < position.x)
+            movement.x = -1;
+        else if (player->position.x > position.x)
+            movement.x = 1;
+    }
+    if (collidedLeftMap)
+        movement.x = 1;
+    else if (collidedRightMap)
+        movement.x = -1;
 }
 
 bool Entity::isCollideBoxtoBox(Entity* other) {
@@ -86,16 +104,16 @@ void Entity::handleCollisionsY(Entity* objects, int objectcount, bool correct) {
                     position.y -= penetrationY;
                     velocity.y = 0;
                 }
-                collidedTop = &objects[i];
-                objects[i].collidedBottom = this;
+                collidedTopEnt = &objects[i];
+                objects[i].collidedBottomEnt = this;
             }
             else if (velocity.y < objects[i].velocity.y) {
                 if (correct) {
                     position.y += penetrationY;
                     velocity.y = 0;
                 }
-                collidedBottom = &objects[i];
-                objects[i].collidedTop = this;
+                collidedBottomEnt = &objects[i];
+                objects[i].collidedTopEnt = this;
             }
         }
     }
@@ -111,16 +129,16 @@ void Entity::handleCollisionsX(Entity* objects, int objectCount, bool correct) {
                     position.x -= penetrationX;
                     velocity.x = 0;
                 }
-                collidedRight = &objects[i];
-                objects[i].collidedLeft = this;
+                collidedRightEnt = &objects[i];
+                objects[i].collidedLeftEnt = this;
             }
             else if (velocity.x < objects[i].velocity.x) {
                 if (correct) {
                     position.x += penetrationX;
                     velocity.x = 0;
                 }
-                collidedLeft = &objects[i];
-                objects[i].collidedRight = this;
+                collidedLeftEnt = &objects[i];
+                objects[i].collidedRightEnt = this;
             }
         }
     }
@@ -143,32 +161,39 @@ void Entity::handleMapCollisionsY(Map* map)
     if (map->IsSolid(top, &penetration_x, &penetration_y) && velocity.y > 0) {
         position.y -= penetration_y;
         velocity.y = 0;
-        //collidedTop = true;
+        collidedTopMap = true;
     }
     else if (map->IsSolid(top_left, &penetration_x, &penetration_y) && velocity.y > 0) {
         position.y -= penetration_y;
         velocity.y = 0;
-        //collidedTop = true;
+        collidedTopMap = true;
     }
     else if (map->IsSolid(top_right, &penetration_x, &penetration_y) && velocity.y > 0) {
         position.y -= penetration_y;
         velocity.y = 0;
-        //collidedTop = true;
+        collidedTopMap = true;
     }
     if (map->IsSolid(bottom, &penetration_x, &penetration_y) && velocity.y < 0) {
         position.y += penetration_y;
         velocity.y = 0;
-        //collidedBottom = true;
+        collidedBottomMap = true;
     }
     else if (map->IsSolid(bottom_left, &penetration_x, &penetration_y) && velocity.y < 0) {
         position.y += penetration_y;
         velocity.y = 0;
-        //collidedBottom = true;
+        collidedBottomMap = true;
     }
     else if (map->IsSolid(bottom_right, &penetration_x, &penetration_y) && velocity.y < 0) {
         position.y += penetration_y;
         velocity.y = 0;
-        //collidedBottom = true;
+        collidedBottomMap = true;
+    }
+
+    if (ai == PACER || ai == BOSS_PACER) {
+        if (!map->IsSolid(bottom_left, &penetration_x, &penetration_y))
+            movement.x = 1;
+        else if (!map->IsSolid(bottom_right, &penetration_x, &penetration_y))
+            movement.x = -1;
     }
 }
 
@@ -182,12 +207,12 @@ void Entity::handleMapCollisionsX(Map* map)
     if (map->IsSolid(left, &penetration_x, &penetration_y) && velocity.x < 0) {
         position.x += penetration_x;
         velocity.x = 0;
-        //collidedLeft = true;
+        collidedLeftMap = true;
     }
     if (map->IsSolid(right, &penetration_x, &penetration_y) && velocity.x > 0) {
         position.x -= penetration_x;
         velocity.x = 0;
-        //collidedRight = true;
+        collidedRightMap = true;
     }
 }
 
@@ -195,12 +220,12 @@ void Entity::Update(float timestep,
 	Entity* player,
 	Map* map,
 	Entity* baddies, int baddycount) {
-    if (!isActive) return;
+    if (!isActive || (type == BADDY && glm::distance(position, player->position) > 12.0f)) return;
 
     timeActive += timestep;
 
     if (animIndices != NULL) {
-        animTime += timestep;
+        animTime += timestep + abs(velocity.x * 0.005);
         if (animTime >= 0.25f) {
             animTime = 0;
             animIndex = (animIndex + 1) % animFrames;
@@ -211,14 +236,27 @@ void Entity::Update(float timestep,
         AI(player);
     }
 
-    collidedTop = NULL;
-    collidedBottom = NULL;
-    collidedLeft = NULL;
-    collidedRight = NULL;
+    collidedTopMap = false;
+    collidedBottomMap = false;
+    collidedLeftMap = false;
+    collidedRightMap = false;
+
+    collidedTopEnt = NULL;
+    collidedBottomEnt = NULL;
+    collidedLeftEnt = NULL;
+    collidedRightEnt = NULL;
 
     if (isJumping) {
         isJumping = false;
         velocity.y = jumpSpeed;
+    }
+
+    if (isInvincible) {
+        iTimer += timestep;
+        if (iTimer >= 3.0f) {
+            isInvincible = false;
+            iTimer = 0.0f;
+        }
     }
 
     //Decelerate if stopped
@@ -242,9 +280,8 @@ void Entity::Update(float timestep,
     isRunning = false;
 
     position.y += velocity.y * timestep;
-    if (ai != SINER) {
+    if (ai != SINER)
         handleMapCollisionsY(map);
-    }
     if (type != PLAYER)
         handleCollisionsY(player, 1, false);
     handleCollisionsY(baddies, baddycount, false);
@@ -270,7 +307,8 @@ void Entity::DrawSpriteFromTextureAtlas(ShaderProgram* program, int index) {
     float texCoords[] = { u, v + height, u + width, v + height, u + width, v,
     u, v + height, u + width, v, u, v };
 
-    float vertices[] = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
+    float vertices[] = { -0.5 * draw_width, -0.5 * draw_height, 0.5 * draw_width, -0.5 * draw_height, 0.5 * draw_width, 0.5 * draw_height,
+                        -0.5 * draw_width, -0.5 * draw_height, 0.5 * draw_width, 0.5 * draw_height, -0.5 * draw_width, 0.5 * draw_height };
 
     glBindTexture(GL_TEXTURE_2D, textureID);
 
@@ -287,7 +325,7 @@ void Entity::DrawSpriteFromTextureAtlas(ShaderProgram* program, int index) {
 }
 
 void Entity::Render(ShaderProgram* program) {
-    if (!isActive) return;
+    if (!isActive || (isInvincible && fmod(timeActive, 0.1) > 0.05)) return;
 
 	program->SetModelMatrix(modelMatrix);
 

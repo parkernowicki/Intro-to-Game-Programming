@@ -1,6 +1,7 @@
 /*
 * Project 5 - Platformer
 *  CONTROLS:
+*  Begin: ENTER
 *  Left: A
 *  Right: D
 *  Jump: SPACE
@@ -13,8 +14,6 @@
 #include <GL/glew.h>
 #endif
 
-#include <vector>
-
 #define GL_GLEXT_PROTOTYPES 1
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -23,8 +22,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 
-#include "Scene.h"
+#include "Title.h"
 #include "Level1.h"
+#include "Level2.h"
+#include "Level3.h"
 #include "Util.h"
 #include "Entity.h"
 #include "Map.h"
@@ -40,17 +41,25 @@ glm::mat4 viewMatrix, projectionMatrix;
 float lastTicks = 0.0f;
 float accumulator = 0.0f;
 
-Scene* currentScene;
-Level1* level1;
+Scene* currentScene, * sceneList[4];
+
+int lives;
 
 void SwitchToScene(Scene* scene) {
+    Mix_FreeMusic(scene->leveltheme);
+    Mix_FreeMusic(scene->victory);
+    Mix_FreeMusic(scene->dead);
+    Mix_FreeChunk(scene->hurt);
+    Mix_FreeChunk(scene->stomp);
+    Mix_FreeChunk(scene->bosshit);
+
     currentScene = scene;
     currentScene->Initialize();
 }
 
 void Initialize() {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-    displayWindow = SDL_CreateWindow("Get them!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
+    displayWindow = SDL_CreateWindow("NOWILAND", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
     SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
     SDL_GL_MakeCurrent(displayWindow, context);
 
@@ -65,29 +74,20 @@ void Initialize() {
     viewMatrix = glm::mat4(1.0f);
     projectionMatrix = glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
 
-    program.SetViewMatrix(viewMatrix);
-    program.SetProjectionMatrix(projectionMatrix);
-
     glUseProgram(program.programID);
-
-    glClearColor(0.53f, 0.8f, 0.92f, 1.0f);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    fontTextureID = Util::LoadTexture("Textures/pixel_font.png");
-
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
-    Mix_VolumeMusic(MIX_MAX_VOLUME / 3);
-    level1_theme = Mix_LoadMUS("Sounds/stage1.mp3");
-    victory = Mix_LoadMUS("Sounds/victory.mp3");
-    die = Mix_LoadWAV("Sounds/doh.wav");
-    stomp = Mix_LoadWAV("Sounds/stomp.wav");
 
-    Mix_PlayMusic(level1_theme, -1);
+    lives = 3;
 
-    level1 = new Level1();
-    SwitchToScene(level1);
+    sceneList[0] = new Title();
+    sceneList[1] = new Level1();
+    sceneList[2] = new Level2();
+    sceneList[3] = new Level3();
+    SwitchToScene(sceneList[0]);
 }
 
 void ProcessInput() {
@@ -103,11 +103,13 @@ void ProcessInput() {
 
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
+            case SDLK_RETURN:
+                if (currentScene == sceneList[0])
+                    currentScene->state.nextScene = 1;
+                break;
             case SDLK_SPACE:
-                if (currentScene->state.player->collidedBottom != NULL) {
-                    if (currentScene->state.player->collidedBottom->type == PLATFORM)
-                        currentScene->state.player->isJumping = true;
-                }
+                if (currentScene->state.player->collidedBottomMap)
+                    currentScene->state.player->isJumping = true;
                 break;
             }
         }
@@ -139,37 +141,33 @@ void Update() {
     }
 
     while (deltaTime >= FIXED_TIMESTEP) {
-        currentScene->Update(FIXED_TIMESTEP);
+        currentScene->Update(FIXED_TIMESTEP, &lives);
         deltaTime -= FIXED_TIMESTEP;
     }
 
     accumulator = deltaTime;
 
     viewMatrix = glm::mat4(1.0f);
-    if (currentScene->state.player->position.x > 5.5) {
+    //if (currentScene->state.player->position.x > 5.5)
         viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, 3.75, 0));
-    }
-    else {
-        viewMatrix = glm::translate(viewMatrix, glm::vec3(-5.5, 3.75, 0));
-    }
+    //else
+        //viewMatrix = glm::translate(viewMatrix, glm::vec3(-5.5, 3.75, 0));
 }
 
 void Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    program.SetViewMatrix(viewMatrix);
+    currentScene->RenderBackground(&program);
 
-    currentScene->Render(&program);
+    program.SetViewMatrix(viewMatrix);
+    program.SetProjectionMatrix(projectionMatrix);
+
+    currentScene->Render(&program, lives);
 
     SDL_GL_SwapWindow(displayWindow);
 }
 
 void Shutdown() {
-    Mix_FreeMusic(level1_theme);
-    Mix_FreeMusic(victory);
-    Mix_FreeChunk(die);
-    Mix_FreeChunk(stomp);
-
     SDL_Quit();
 }
 
@@ -179,6 +177,8 @@ int main(int argc, char* argv[]) {
     while (gameIsRunning) {
         ProcessInput();
         Update();
+        if (currentScene->state.nextScene >= 0)
+            SwitchToScene(sceneList[currentScene->state.nextScene]);
         Render();
     }
 
