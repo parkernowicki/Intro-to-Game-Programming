@@ -1,20 +1,20 @@
 #include "Level2.h"
 
-#define LEVEL2_WIDTH 32
+#define LEVEL2_WIDTH 64
 #define LEVEL2_HEIGHT 8
 
-#define LEVEL2_BADDYCOUNT 3
+#define LEVEL2_BADDYCOUNT 11
 
 unsigned int level2_data[] =
 {
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2,
-    3, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0,
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0,
+    3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0, 0, 2, 3, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 1, 1, 1, 1, 1, 1,
+    3, 2, 3, 2, 3, 0, 0, 0, 0, 3, 2, 2, 2, 2, 2, 2, 3, 2, 1, 1, 1, 1, 1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 0, 0, 2, 2, 2, 2, 3, 2, 2, 0, 0, 3, 3, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 3, 2, 2, 2
 };
 
 void Level2::Initialize() {
@@ -34,14 +34,19 @@ void Level2::Initialize() {
     state.player->acceleration = 16.0f;
     state.player->walkSpeed = 150.0f;
     state.player->runSpeed = 300.0f;
-    state.player->jumpSpeed = 8.2f;
-    state.player->textureID = Util::LoadTexture("Textures/ufo.png");
+    state.player->jumpSpeed = 8.8f;
+    state.player->jumpTimeMax = 0.25f;
+    state.player->width = 0.6f;
+    state.player->textureID = Util::LoadTexture("Textures/skelly.png");
 
-    state.player->animDefault = new int[4]{ 0, 2, 4, 6 };
-    state.player->animIndices = state.player->animDefault;
-    state.player->animFrames = 4;
-    state.player->animRows = 4;
-    state.player->animCols = 2;
+    state.player->animRight = new int[2]{ 0, 7 };
+    state.player->animLeft = new int[2]{ 1, 8 };
+    state.player->animJumpRight = new int[2]{ 4, 11 };
+    state.player->animJumpLeft = new int[2]{ 5, 12 };
+    state.player->animIndices = state.player->animRight;
+    state.player->animFrames = 2;
+    state.player->animRows = 2;
+    state.player->animCols = 7;
 
     //Init baddies
     baddiesleft = LEVEL2_BADDYCOUNT;
@@ -50,7 +55,7 @@ void Level2::Initialize() {
     GLuint rupertTextureID = Util::LoadTexture("Textures/rupert.png");
     GLuint ozzpreyTextureID = Util::LoadTexture("Textures/ozzprey.png");
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 4; i++) {
         state.baddies[i].type = BADDY;
         state.baddies[i].ai = PACER;
         state.baddies[i].movement.x = -1;
@@ -64,34 +69,45 @@ void Level2::Initialize() {
         state.baddies[i].animRows = 2;
         state.baddies[i].animCols = 1;
     }
-    state.baddies[0].position = glm::vec3(10.0f, -4.0f, 0.0f);
-    state.baddies[1].position = glm::vec3(23.0f, -4.0f, 0.0f);
+    state.baddies[0].position = glm::vec3(20.0f, -5.0f, 0.0f);
+    state.baddies[1].position = glm::vec3(21.0f, -2.0f, 0.0f);
+    state.baddies[2].position = glm::vec3(28.0f, -3.0f, 0.0f);
+    state.baddies[3].position = glm::vec3(55.0f, -3.0f, 0.0f);
 
-    /*state.baddies[1].type = BADDY;
-    state.baddies[1].ai = HOPPER;
-    state.baddies[1].state = WAIT;
-    state.baddies[1].position = glm::vec3(12.0f, -3.0f, 0.0f);
-    state.baddies[1].acceleration = 16.0f;
-    state.baddies[1].walkSpeed = 80.0f;
-    state.baddies[1].jumpSpeed = 6.0f;
-    state.baddies[1].height = 0.8f;
-    state.baddies[1].textureID = rupertTextureID;
+    for (int i = 4; i < 10; i++) {
+        state.baddies[i].type = BADDY;
+        state.baddies[i].ai = HOPPER;
+        state.baddies[i].state = WAIT;
+        state.baddies[i].acceleration = 16.0f;
+        state.baddies[i].walkSpeed = 80.0f;
+        state.baddies[i].jumpSpeed = 9.0f;
+        state.baddies[i].height = 0.8f;
+        state.baddies[i].textureID = rupertTextureID;
 
-    state.baddies[1].animRows = 2;
-    state.baddies[1].animCols = 1;*/
+        state.baddies[i].animRows = 2;
+        state.baddies[i].animCols = 1;
+    }
+    state.baddies[4].position = glm::vec3(15.0f, -5.0f, 0.0f);
+    state.baddies[5].position = glm::vec3(30.0f, -2.0f, 0.0f);
+    state.baddies[6].position = glm::vec3(49.0f, -2.0f, 0.0f);
+    state.baddies[7].position = glm::vec3(53.5f, -6.0f, 0.0f);
+    state.baddies[8].position = glm::vec3(54.5f, -6.0f, 0.0f);
 
-    state.baddies[2].type = BADDY;
-    state.baddies[2].ai = SINER;
-    state.baddies[2].position = glm::vec3(20.0f, -2.0f, 0.0f);
-    state.baddies[2].movement.x = -1;
-    state.baddies[2].acceleration = 16.0f;
-    state.baddies[2].walkSpeed = 120.0f;
-    state.baddies[2].height = 0.6f;
-    state.baddies[2].gravity = glm::vec3(0);
-    state.baddies[2].textureID = ozzpreyTextureID;
+    for (int i = 9; i < 11; i++) {
+        state.baddies[i].type = BADDY;
+        state.baddies[i].ai = SINER;
+        state.baddies[i].movement.x = -1;
+        state.baddies[i].acceleration = 16.0f;
+        state.baddies[i].walkSpeed = 120.0f;
+        state.baddies[i].height = 0.6f;
+        state.baddies[i].gravity = glm::vec3(0);
+        state.baddies[i].textureID = ozzpreyTextureID;
 
-    state.baddies[2].animRows = 3;
-    state.baddies[2].animCols = 1;
+        state.baddies[i].animRows = 3;
+        state.baddies[i].animCols = 1;
+    }
+    state.baddies[9].position = glm::vec3(48.0f, -5.0f, 0.0f);
+    state.baddies[10].position = glm::vec3(50.0f, -4.0f, 0.0f);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -114,7 +130,7 @@ void Level2::Update(float timestep, int* lives) {
         NULL,
         state.map,
         state.baddies, LEVEL2_BADDYCOUNT);
-    if (state.player->position.x >= 31) {
+    if (state.player->position.x >= 60.0f) {
         state.nextScene = 3;
         return;
     }
@@ -131,19 +147,9 @@ void Level2::Update(float timestep, int* lives) {
             if (--state.player->collidedBottomEnt->health == 0) {
                 state.player->collidedBottomEnt->isActive = false;
                 --baddiesleft;
-                //We win!
-                if (state.player->collidedBottomEnt->ai == BOSS_PACER) {
-                    state.player->isWin = true;
-                    Mix_PlayMusic(victory, 1);
-                }
             }
-            if (state.player->collidedBottomEnt->ai == BOSS_PACER)
-                state.player->collidedBottomEnt->isInvincible = true;
             state.player->isJumping = true;
-            if (state.player->collidedBottomEnt->ai != BOSS_PACER)
-                Mix_PlayChannel(-1, stomp, 0);
-            else
-                Mix_PlayChannel(-1, bosshit, 0);
+            Mix_PlayChannel(-1, stomp, 0);
         }
     }
     else if (state.player->collidedTopEnt != NULL) {
@@ -153,6 +159,7 @@ void Level2::Update(float timestep, int* lives) {
             *lives -= 1;
             if (*lives == 0) {
                 state.player->isDead = true;
+                state.player->isInvincible = false;
                 Mix_PlayMusic(dead, 1);
             }
             else {
@@ -168,6 +175,7 @@ void Level2::Update(float timestep, int* lives) {
             *lives -= 1;
             if (*lives == 0) {
                 state.player->isDead = true;
+                state.player->isInvincible = false;
                 Mix_PlayMusic(dead, 1);
             }
             else {
@@ -183,6 +191,7 @@ void Level2::Update(float timestep, int* lives) {
             *lives -= 1;
             if (*lives == 0) {
                 state.player->isDead = true;
+                state.player->isInvincible = false;
                 Mix_PlayMusic(dead, 1);
             }
             else {

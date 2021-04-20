@@ -1,20 +1,20 @@
 #include "Level3.h"
 
-#define LEVEL3_WIDTH 32
+#define LEVEL3_WIDTH 48
 #define LEVEL3_HEIGHT 8
 
-#define LEVEL3_BADDYCOUNT 3
+#define LEVEL3_BADDYCOUNT 10
 
 unsigned int level3_data[] =
 {
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2,
-    3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2,
-    3, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2,
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+    3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+    3, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+    3, 1, 1, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 2, 2, 0, 0, 0, 2, 3, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+    3, 2, 2, 2, 3, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 2, 3, 2, 2, 0, 0, 0, 2, 3, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2
 };
 
 void Level3::Initialize() {
@@ -23,7 +23,7 @@ void Level3::Initialize() {
     uiViewMatrix = glm::mat4(1.0);
     uiProjectionMatrix = glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
 
-    GLuint mapTextureID = Util::LoadTexture("Textures/tile1.png");
+    GLuint mapTextureID = Util::LoadTexture("Textures/tile3.png");
     backgroundTextureID = Util::LoadTexture("Textures/level3_background.png");
     state.map = new Map(LEVEL3_WIDTH, LEVEL3_HEIGHT, level3_data, mapTextureID, 1.0f, 4, 1);
 
@@ -34,81 +34,96 @@ void Level3::Initialize() {
     state.player->acceleration = 16.0f;
     state.player->walkSpeed = 150.0f;
     state.player->runSpeed = 300.0f;
-    state.player->jumpSpeed = 8.2f;
-    state.player->textureID = Util::LoadTexture("Textures/ufo.png");
+    state.player->jumpSpeed = 8.8f;
+    state.player->jumpTimeMax = 0.25f;
+    state.player->width = 0.6f;
+    state.player->textureID = Util::LoadTexture("Textures/skelly.png");
 
-    state.player->animDefault = new int[4]{ 0, 2, 4, 6 };
-    state.player->animIndices = state.player->animDefault;
-    state.player->animFrames = 4;
-    state.player->animRows = 4;
-    state.player->animCols = 2;
+    state.player->animRight = new int[2]{ 0, 7 };
+    state.player->animLeft = new int[2]{ 1, 8 };
+    state.player->animJumpRight = new int[2]{ 4, 11 };
+    state.player->animJumpLeft = new int[2]{ 5, 12 };
+    state.player->animIndices = state.player->animRight;
+    state.player->animFrames = 2;
+    state.player->animRows = 2;
+    state.player->animCols = 7;
 
     //Init baddies
     baddiesleft = LEVEL3_BADDYCOUNT;
     state.baddies = new Entity[LEVEL3_BADDYCOUNT];
     GLuint roscoeTextureID = Util::LoadTexture("Textures/roscoe.png");
+    GLuint bosscoeTextureID = Util::LoadTexture("Textures/bosscoe.png");
     GLuint rupertTextureID = Util::LoadTexture("Textures/rupert.png");
     GLuint ozzpreyTextureID = Util::LoadTexture("Textures/ozzprey.png");
-    GLuint bosscoeTextureID = Util::LoadTexture("Textures/bosscoe.png");
 
-	state.baddies[0].type = BADDY;
-	state.baddies[0].ai = PACER;
-	state.baddies[0].movement.x = -1;
-	state.baddies[0].acceleration = 16.0f;
-	state.baddies[0].walkSpeed = 80.0f;
-	state.baddies[0].textureID = roscoeTextureID;
+    for (int i = 0; i < 3; i++) {
+        state.baddies[i].type = BADDY;
+        state.baddies[i].ai = PACER;
+        state.baddies[i].movement.x = -1;
+        state.baddies[i].acceleration = 16.0f;
+        state.baddies[i].walkSpeed = 80.0f;
+        state.baddies[i].textureID = roscoeTextureID;
 
-	state.baddies[0].animDefault = new int[2]{ 0, 1 };
-	state.baddies[0].animIndices = state.baddies[0].animDefault;
-	state.baddies[0].animFrames = 2;
-	state.baddies[0].animRows = 2;
-	state.baddies[0].animCols = 1;
-    state.baddies[0].position = glm::vec3(10.0f, -4.0f, 0.0f);
+        state.baddies[i].animDefault = new int[2]{ 0, 1 };
+        state.baddies[i].animIndices = state.baddies[0].animDefault;
+        state.baddies[i].animFrames = 2;
+        state.baddies[i].animRows = 2;
+        state.baddies[i].animCols = 1;
+    }
+    state.baddies[0].position = glm::vec3(10.0f, -6.0f, 0.0f);
+    state.baddies[1].position = glm::vec3(12.0f, -6.0f, 0.0f);
+    state.baddies[2].position = glm::vec3(30.0f, -5.0f, 0.0f);
 
-    /*state.baddies[1].type = BADDY;
-    state.baddies[1].ai = HOPPER;
-    state.baddies[1].state = WAIT;
-    state.baddies[1].position = glm::vec3(12.0f, -3.0f, 0.0f);
-    state.baddies[1].acceleration = 16.0f;
-    state.baddies[1].walkSpeed = 80.0f;
-    state.baddies[1].jumpSpeed = 6.0f;
-    state.baddies[1].height = 0.8f;
-    state.baddies[1].textureID = rupertTextureID;
+    state.baddies[3].type = BADDY;
+    state.baddies[3].ai = BOSS_PACER;
+    state.baddies[3].movement.x = -1;
+    state.baddies[3].acceleration = 16.0f;
+    state.baddies[3].walkSpeed = 80.0f;
+    state.baddies[3].width = 1.6f;
+    state.baddies[3].height = 1.8f;
+    state.baddies[3].draw_width = 2.0f;
+    state.baddies[3].draw_height = 2.0f;
+    state.baddies[3].health = 3;
+    state.baddies[3].textureID = bosscoeTextureID;
 
-    state.baddies[1].animRows = 2;
-    state.baddies[1].animCols = 1;*/
+    state.baddies[3].animDefault = new int[2]{ 0, 1 };
+    state.baddies[3].animIndices = state.baddies[2].animDefault;
+    state.baddies[3].animFrames = 2;
+    state.baddies[3].animRows = 2;
+    state.baddies[3].animCols = 1;
+    state.baddies[3].position = glm::vec3(46.0f, -5.0f, 0.0f);
 
-    state.baddies[1].type = BADDY;
-    state.baddies[1].ai = SINER;
-    state.baddies[1].position = glm::vec3(20.0f, -2.0f, 0.0f);
-    state.baddies[1].movement.x = -1;
-    state.baddies[1].acceleration = 16.0f;
-    state.baddies[1].walkSpeed = 120.0f;
-    state.baddies[1].height = 0.6f;
-    state.baddies[1].gravity = glm::vec3(0);
-    state.baddies[1].textureID = ozzpreyTextureID;
+    for (int i = 4; i < 6; i++) {
+        state.baddies[i].type = BADDY;
+        state.baddies[i].ai = HOPPER;
+        state.baddies[i].state = WAIT;
+        state.baddies[i].acceleration = 16.0f;
+        state.baddies[i].walkSpeed = 80.0f;
+        state.baddies[i].jumpSpeed = 9.0f;
+        state.baddies[i].height = 0.8f;
+        state.baddies[i].textureID = rupertTextureID;
 
-    state.baddies[1].animRows = 3;
-    state.baddies[1].animCols = 1;
+        state.baddies[i].animRows = 2;
+        state.baddies[i].animCols = 1;
+    }
+    state.baddies[4].position = glm::vec3(32.0f, -4.0f, 0.0f);
+    state.baddies[5].position = glm::vec3(37.0f, -2.0f, 0.0f);
 
-    state.baddies[2].type = BADDY;
-    state.baddies[2].ai = BOSS_PACER;
-    state.baddies[2].movement.x = -1;
-    state.baddies[2].acceleration = 16.0f;
-    state.baddies[2].walkSpeed = 80.0f;
-    state.baddies[2].width = 1.8f;
-    state.baddies[2].height = 1.8f;
-    state.baddies[2].draw_width = 2.0f;
-    state.baddies[2].draw_height = 2.0f;
-    state.baddies[2].health = 3;
-    state.baddies[2].textureID = bosscoeTextureID;
+    for (int i = 6; i < 8; i++) {
+        state.baddies[i].type = BADDY;
+        state.baddies[i].ai = SINER;
+        state.baddies[i].movement.x = -1;
+        state.baddies[i].acceleration = 16.0f;
+        state.baddies[i].walkSpeed = 120.0f;
+        state.baddies[i].height = 0.6f;
+        state.baddies[i].gravity = glm::vec3(0);
+        state.baddies[i].textureID = ozzpreyTextureID;
 
-    state.baddies[2].animDefault = new int[2]{ 0, 1 };
-    state.baddies[2].animIndices = state.baddies[2].animDefault;
-    state.baddies[2].animFrames = 2;
-    state.baddies[2].animRows = 2;
-    state.baddies[2].animCols = 1;
-    state.baddies[2].position = glm::vec3(23.0f, -4.0f, 0.0f);
+        state.baddies[i].animRows = 3;
+        state.baddies[i].animCols = 1;
+    }
+    state.baddies[6].position = glm::vec3(24.0f, -4.0f, 0.0f);
+    state.baddies[7].position = glm::vec3(42.0f, -4.0f, 0.0f);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -147,6 +162,7 @@ void Level3::Update(float timestep, int* lives) {
                 //We win!
                 if (state.player->collidedBottomEnt->ai == BOSS_PACER) {
                     state.player->isWin = true;
+                    state.player->isInvincible = false;
                     Mix_PlayMusic(victory, 1);
                 }
             }
@@ -166,6 +182,7 @@ void Level3::Update(float timestep, int* lives) {
             *lives -= 1;
             if (*lives == 0) {
                 state.player->isDead = true;
+                state.player->isInvincible = false;
                 Mix_PlayMusic(dead, 1);
             }
             else {
@@ -181,6 +198,7 @@ void Level3::Update(float timestep, int* lives) {
             *lives -= 1;
             if (*lives == 0) {
                 state.player->isDead = true;
+                state.player->isInvincible = false;
                 Mix_PlayMusic(dead, 1);
             }
             else {
@@ -196,6 +214,7 @@ void Level3::Update(float timestep, int* lives) {
             *lives -= 1;
             if (*lives == 0) {
                 state.player->isDead = true;
+                state.player->isInvincible = false;
                 Mix_PlayMusic(dead, 1);
             }
             else {

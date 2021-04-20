@@ -35,7 +35,7 @@ public:
 	glm::mat4 modelMatrix;
 
 	float acceleration = 0.0f, walkSpeed = 0.0f, runSpeed = 0.0f, jumpSpeed = 0.0f;
-	bool isJumping = false, isRunning = false, isInvincible = false;
+	bool isJumping = false, inJumpState = false, isRunning = false, isInvincible = false;
 
 	float width = 1.0f, height = 1.0f, draw_width = 1.0f, draw_height = 1.0f;
 
@@ -49,7 +49,7 @@ public:
 	Entity* collidedLeftEnt = NULL;
 	Entity* collidedRightEnt = NULL;
 
-	float timeActive = 0.0f, jumpTimer = 0.0f, iTimer = 0.0f;
+	float timeActive = 0.0f, jumpTimer = 0.0f, jumpTimeMax = 0.0f, iTimer = 0.0f;
 
 	bool isActive = true;
 	bool isDead = false;
@@ -59,11 +59,11 @@ public:
 
 	GLuint textureID = -1;
 
-	int* animDefault = NULL;
+	int* animDefault = NULL, * animLeft = NULL, * animRight = NULL, * animJumpLeft = NULL, * animJumpRight = NULL;
 	int* animIndices = NULL;
 	int animFrames = 0;
 	int animIndex = 0;
-	float animTime = 0;
+	float animTime = 0.0f;
 	int animCols = 0;
 	int animRows = 0;
 

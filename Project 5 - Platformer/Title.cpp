@@ -23,7 +23,7 @@ void Title::Render(ShaderProgram* program, int lives) {
     program->SetViewMatrix(uiViewMatrix);
     program->SetProjectionMatrix(uiProjectionMatrix);
 
-    Util::DrawText(program, fontTextureID, "NOWILAND", 0.5f, 0.0f, glm::vec3(-2.0f, 1.0f, 0.0f));
+    Util::DrawText(program, fontTextureID, "SKELLYQUEST", 0.5f, 0.0f, glm::vec3(-2.6f, 1.0f, 0.0f));
     Util::DrawText(program, fontTextureID, "Press ENTER to begin", 0.25f, 0.0f, glm::vec3(-2.5f, -1.0f, 0.0f));
 }
 

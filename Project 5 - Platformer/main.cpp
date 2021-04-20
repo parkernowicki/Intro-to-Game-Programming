@@ -41,17 +41,17 @@ glm::mat4 viewMatrix, projectionMatrix;
 float lastTicks = 0.0f;
 float accumulator = 0.0f;
 
-Scene* currentScene, * sceneList[4];
+Scene *currentScene, *sceneList[4];
 
 int lives;
 
 void SwitchToScene(Scene* scene) {
-    Mix_FreeMusic(scene->leveltheme);
-    Mix_FreeMusic(scene->victory);
-    Mix_FreeMusic(scene->dead);
-    Mix_FreeChunk(scene->hurt);
-    Mix_FreeChunk(scene->stomp);
-    Mix_FreeChunk(scene->bosshit);
+    Mix_FreeMusic(currentScene->leveltheme);
+    Mix_FreeMusic(currentScene->victory);
+    Mix_FreeMusic(currentScene->dead);
+    Mix_FreeChunk(currentScene->hurt);
+    Mix_FreeChunk(currentScene->stomp);
+    Mix_FreeChunk(currentScene->bosshit);
 
     currentScene = scene;
     currentScene->Initialize();
@@ -59,7 +59,7 @@ void SwitchToScene(Scene* scene) {
 
 void Initialize() {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-    displayWindow = SDL_CreateWindow("NOWILAND", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
+    displayWindow = SDL_CreateWindow("SKELLYQUEST", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
     SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
     SDL_GL_MakeCurrent(displayWindow, context);
 
@@ -87,7 +87,9 @@ void Initialize() {
     sceneList[1] = new Level1();
     sceneList[2] = new Level2();
     sceneList[3] = new Level3();
-    SwitchToScene(sceneList[0]);
+
+    currentScene = sceneList[0];
+    currentScene->Initialize();
 }
 
 void ProcessInput() {
@@ -100,7 +102,6 @@ void ProcessInput() {
         case SDL_WINDOWEVENT_CLOSE:
             gameIsRunning = false;
             break;
-
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
             case SDLK_RETURN:
@@ -116,12 +117,20 @@ void ProcessInput() {
     }
 
     const Uint8* keys = SDL_GetKeyboardState(NULL);
-    if (keys[SDL_SCANCODE_D])
+    if (keys[SDL_SCANCODE_D]) {
         currentScene->state.player->movement.x = 1.0f;
-    if (keys[SDL_SCANCODE_A])
+        if (currentScene->state.player->collidedBottomMap)
+            currentScene->state.player->animIndices = currentScene->state.player->animRight;
+    }
+    if (keys[SDL_SCANCODE_A]) {
         currentScene->state.player->movement.x = -1.0f;
+        if (currentScene->state.player->collidedBottomMap)
+            currentScene->state.player->animIndices = currentScene->state.player->animLeft;
+    }
     if (keys[SDL_SCANCODE_LSHIFT])
         currentScene->state.player->isRunning = true;
+    if (!keys[SDL_SCANCODE_SPACE])
+        currentScene->state.player->inJumpState = false;
 
     if (glm::length(currentScene->state.player->movement) > 1.0f)
         currentScene->state.player->movement = glm::normalize(currentScene->state.player->movement);
@@ -148,10 +157,10 @@ void Update() {
     accumulator = deltaTime;
 
     viewMatrix = glm::mat4(1.0f);
-    //if (currentScene->state.player->position.x > 5.5)
+    if (currentScene->state.player->position.x > 5.5)
         viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, 3.75, 0));
-    //else
-        //viewMatrix = glm::translate(viewMatrix, glm::vec3(-5.5, 3.75, 0));
+    else
+        viewMatrix = glm::translate(viewMatrix, glm::vec3(-5.5, 3.75, 0));
 }
 
 void Render() {

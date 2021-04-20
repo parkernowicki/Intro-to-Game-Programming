@@ -1,13 +1,10 @@
 #include "Entity.h"
 
 Entity::Entity() {
-
     position = glm::vec3(0);
     movement = glm::vec3(0);
-    gravity = glm::vec3(0.0f, -16.0f, 0.0f);
+    gravity = glm::vec3(0.0f, -32.0f, 0.0f);
     velocity = glm::vec3(0);
-
-    modelMatrix = glm::mat4(1.0f);
 }
 
 void Entity::AI(Entity* player) {
@@ -38,10 +35,6 @@ void Entity::AIPacer() {
 
 void Entity::AISiner() {
     position.y += sin(fmod(timeActive * 2.0, 2.0 * M_PI)) / 30.0;
-    /*if (position.x <= -6.0)
-        position.x = 6.0;
-    else if (position.x >= 6.0)
-        position.x = -6.0;*/
 }
 
 void Entity::AIHopper(Entity* player) {
@@ -70,14 +63,15 @@ void Entity::AIHopper(Entity* player) {
 
 void Entity::AIBossPacer(Entity* player) {
     if (isInvincible)
-        walkSpeed = 200.0f;
-    else
+        walkSpeed = 240.0f;
+    else {
         walkSpeed = 80.0f;
-    if (fmod(timeActive, 1.0) > 0.75) {
-        if (player->position.x < position.x)
-            movement.x = -1;
-        else if (player->position.x > position.x)
-            movement.x = 1;
+        if (fmod(timeActive, 1.0) > 0.75) {
+            if (player->position.x < position.x)
+                movement.x = -1;
+            else if (player->position.x > position.x)
+                movement.x = 1;
+        }
     }
     if (collidedLeftMap)
         movement.x = 1;
@@ -225,16 +219,31 @@ void Entity::Update(float timestep,
     timeActive += timestep;
 
     if (animIndices != NULL) {
-        animTime += timestep + abs(velocity.x * 0.005);
-        if (animTime >= 0.25f) {
-            animTime = 0;
-            animIndex = (animIndex + 1) % animFrames;
+        if (type == PLAYER && collidedBottomMap) {
+            if (animIndices == animJumpRight)
+                animIndices = animRight;
+            if (animIndices == animJumpLeft)
+                animIndices = animLeft;
         }
+        else if (type == PLAYER && !collidedBottomMap) {
+            if (animIndices == animRight)
+                animIndices = animJumpRight;
+            if (animIndices == animLeft)
+                animIndices = animJumpLeft;
+        }
+        if (glm::length(movement)) {
+            animTime += timestep + abs(velocity.x * 0.005);
+            if (animTime >= 0.25f) {
+                animTime = 0;
+                animIndex = (animIndex + 1) % animFrames;
+            }
+        }
+        else
+            animIndex = 0;
     }
 
-    if (type == BADDY) {
+    if (type == BADDY)
         AI(player);
-    }
 
     collidedTopMap = false;
     collidedBottomMap = false;
@@ -248,8 +257,17 @@ void Entity::Update(float timestep,
 
     if (isJumping) {
         isJumping = false;
-        velocity.y = jumpSpeed;
+        inJumpState = true;
     }
+    //We can hold jump to gain more height!
+    if (inJumpState) {
+        velocity.y = jumpSpeed;
+        jumpTimer += timestep;
+        if (jumpTimer >= jumpTimeMax)
+            inJumpState = false;    
+    }
+    else
+        jumpTimer = 0.0f;
 
     if (isInvincible) {
         iTimer += timestep;
@@ -330,11 +348,7 @@ void Entity::Render(ShaderProgram* program) {
 	program->SetModelMatrix(modelMatrix);
 
     if (isDead) {
-        DrawSpriteFromTextureAtlas(program, 1);
-        return;
-    }
-    if (isWin) {
-        DrawSpriteFromTextureAtlas(program, 3);
+        DrawSpriteFromTextureAtlas(program, 6);
         return;
     }
 
@@ -361,7 +375,8 @@ void Entity::Render(ShaderProgram* program) {
         return;
     }
 
-	float vertices[] = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
+    float vertices[] = { -0.5 * draw_width, -0.5 * draw_height, 0.5 * draw_width, -0.5 * draw_height, 0.5 * draw_width, 0.5 * draw_height,
+                        -0.5 * draw_width, -0.5 * draw_height, 0.5 * draw_width, 0.5 * draw_height, -0.5 * draw_width, 0.5 * draw_height };
 	float texCoords[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
